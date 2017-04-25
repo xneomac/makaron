@@ -1,0 +1,4 @@
+version:
+  - file: setup.py
+    regex:
+      all: "__version__ = .*"
