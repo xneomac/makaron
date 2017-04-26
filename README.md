@@ -25,9 +25,9 @@ You can also choose to store your version number in different line with the foll
 version:
   - file: setup.py
     regex:
-      major: 'major = .*\n'
-      minor: 'minor = .*\n'
-      patch: 'patch = .*\n'
+      major: "major = .*\n"
+      minor: "minor = .*\n"
+      patch: "patch = .*\n"
 ```
 
 You can also add several files to update, like so:
@@ -39,9 +39,9 @@ version:
       all: "__version__ = .*"
   - file: setup.py
     regex:
-      major: 'major = .*\n'
-      minor: 'minor = .*\n'
-      patch: 'patch = .*\n'
+      major: "major = .*\n"
+      minor: "minor = .*\n"
+      patch: "patch = .*\n"
 ```
 
 ## Update version

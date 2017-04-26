@@ -4,8 +4,16 @@ import argparse, re, os, yaml
 
 config_file = '.makaronrc'
 
+__version__ = '0.1.1'
+__program__ = 'makaron'
 
 def main(args):
+
+    if args.next and not args.verb:
+        raise(RuntimeError('Cannot show you next release if you do not indicate the type of the release.\nAdd \'major\', \'minor\' or \'patch\' to the command.'))
+
+    if args.version:
+        raise(RuntimeError('{0} {1}'.format(__program__, __version__)))
 
     if os.path.isfile(config_file):
 
@@ -14,14 +22,35 @@ def main(args):
             parse_and_execute_config(args, config)
 
     else:
-        print('no \'.makaronrc\' file found')
+        if args.generate_rcfile:
+            generate_empty_rcfile(args)
+        else:
+            raise(RuntimeError('No \'.makaronrc\' file found.\nCreate one by executing \'makaron --generate-rcfile\''))
+
+
+def generate_empty_rcfile(args):
+
+    with open(config_file, 'w') as stream:
+        stream.write(\
+'''# .makaronrc
+version:
+  - file: setup.py
+    regex:
+      all: "__version__ = .*\\n"
+  - file: setup.py
+    regex:
+      major: "major = .*\\n"
+      minor: "minor = .*\\n"
+      patch: "patch = .*\\n"
+''')
+        print('hey')
 
 
 def parse_and_execute_config(args, config):
 
     version_collected = []
 
-    if 'version' in config:
+    if 'version' in config and config['version']:
 
         rules = parse_rules(config)
         version_collected = collect_versions(args, rules)
@@ -30,10 +59,13 @@ def parse_and_execute_config(args, config):
         old_version = version_collected[0].split('.')
         new_version = update_version(args, old_version)
 
-        prompt_choice(args, rules, old_version, new_version)
+        if args.next:
+            print_version(args, new_version)
+        else:
+            prompt_choice(args, rules, old_version, new_version)
 
     else:
-        print('nothing to do')
+        print('Makaron has nothing to do.')
 
 
 def parse_rules(config):
@@ -51,7 +83,7 @@ def parse_rule(rules, version_rule):
     if 'file' in version_rule:
         filename = version_rule['file']
     else:
-        raise(Exception('bad \'.makaronrc\' file: missing file info'))
+        raise(RuntimeError('Bad \'.makaronrc\' file: missing file info.'))
 
     if 'regex' in version_rule:
         regex = version_rule['regex']
@@ -67,10 +99,10 @@ def parse_rule(rules, version_rule):
             rules['separated'].append({'filename': filename, 'major': major_regex, 'minor': minor_regex, 'patch': patch_regex})
 
         else:
-            raise(Exception('bad \'.makaronrc\' file: invalid regex info'))
+            raise(RuntimeError('Bad \'.makaronrc\' file: invalid regex info.'))
 
     else:
-        raise(Exception('bad \'.makaronrc\' file: missing regex info'))
+        raise(RuntimeError('Bad \'.makaronrc\' file: missing regex info.'))
 
 
 def collect_versions(args, rules):
@@ -90,18 +122,21 @@ def collect_versions(args, rules):
 
 def collect_version_with__all_rule(args, filename, all_regex):
 
-    with open(filename, 'r') as stream:
-        content = stream.read()
+    try:
+        with open(filename, 'r') as stream:
+            content = stream.read()
 
-        m = re.search(all_regex, content)
-        if m: version_line = m.group(0)
-        else: raise(Exception('\'{0}\': no version found'.format(filename)))
+            m = re.search(all_regex, content)
+            if m: version_line = m.group(0)
+            else: raise(RuntimeError('\'{0}\': no version found'.format(filename)))
 
-        m = re.search('[0-9]\.[0-9]\.[0-9]', version_line)
-        if m: version_number = m.group(0)
-        else: raise(Exception('\'{0}\': no version found'.format(filename)))
+            m = re.search('[0-9]\.[0-9]\.[0-9]', version_line)
+            if m: version_number = m.group(0)
+            else: raise(RuntimeError('\'{0}\': no version found'.format(filename)))
 
-        return version_number
+            return version_number
+    except FileNotFoundError as e:
+        raise(RuntimeError('No such file: \'{0}\''.format(filename)))
 
 
 def collect_version_with__separated_rule(args, filename, major_regex, minor_regex, patch_regex):
@@ -111,27 +146,27 @@ def collect_version_with__separated_rule(args, filename, major_regex, minor_rege
 
         m = re.search(major_regex, content)
         if m: major_line = m.group(0)
-        else: raise(Exception('\'{0}\': no major found'.format(filename)))
+        else: raise(RuntimeError('No major found: \'{0}\''.format(filename)))
 
         m = re.search('[0-9]', major_line)
         if m: major_number = m.group(0)
-        else: raise(Exception('\'{0}\': no major found'.format(filename)))
+        else: raise(RuntimeError('No major found: \'{0}\''.format(filename)))
 
         m = re.search(minor_regex, content)
         if m: minor_line = m.group(0)
-        else: raise(Exception('\'{0}\': no minor found'.format(filename)))
+        else: raise(RuntimeError('No minor found: \'{0}\''.format(filename)))
 
         m = re.search('[0-9]', minor_line)
         if m: minor_number = m.group(0)
-        else: raise(Exception('\'{0}\': no minor found'.format(filename)))
+        else: raise(RuntimeError('No minor found: \'{0}\''.format(filename)))
 
         m = re.search(patch_regex, content)
         if m: patch_line = m.group(0)
-        else: raise(Exception('\'{0}\': no major found'.format(filename)))
+        else: raise(RuntimeError('No patch found: \'{0}\''.format(filename)))
 
         m = re.search('[0-9]', patch_line)
         if m: patch_number = m.group(0)
-        else: raise(Exception('\'{0}\': no major found'.format(filename)))
+        else: raise(RuntimeError('No patch found: \'{0}\''.format(filename)))
 
         return '{0}.{1}.{2}'.format(major_number, minor_number, patch_number)
 
@@ -145,24 +180,26 @@ def check_version(args, version_collected):
             ok = False
 
     if not ok:
-        raise(Exception('version found are not the same: {0}'.format(version_collected)))
+        raise(RuntimeError('Version found are not the same: {0}.'.format(version_collected)))
 
 
 def update_version(args, old_version):
 
     new_version = old_version.copy()
 
-    if 'major' in args.verb:
-        new_version = increase_version(new_version, 0)
-        new_version[1] = '0'
-        new_version[2] = '0'
+    if args.verb:
 
-    elif 'minor' in args.verb:
-        new_version = increase_version(new_version, 1)
-        new_version[2] = '0'
+        if 'major' in args.verb:
+            new_version = increase_version(new_version, 0)
+            new_version[1] = '0'
+            new_version[2] = '0'
 
-    elif 'patch' in args.verb:
-        new_version = increase_version(new_version, 2)
+        elif 'minor' in args.verb:
+            new_version = increase_version(new_version, 1)
+            new_version[2] = '0'
+
+        elif 'patch' in args.verb:
+            new_version = increase_version(new_version, 2)
 
     return new_version
 
@@ -170,6 +207,11 @@ def update_version(args, old_version):
 def increase_version(version, index):
     version[index] = str(int(version[index]) + 1)
     return version
+
+
+def print_version(args, new_version):
+    new_version_str = '.'.join(new_version)
+    print(new_version_str)
 
 
 def prompt_choice(args, rules, old_version, new_version):
@@ -270,13 +312,17 @@ def apply_version_separated_rule(args, filename, major_regex, minor_regex, patch
 if __name__ == '__main__':
 
     try:
-        parser = argparse.ArgumentParser(prog='kooki')
-        parser.add_argument('verb')
+        parser = argparse.ArgumentParser(prog=__program__, add_help=False)
+        parser.add_argument('verb', help='What your next release will be.', nargs='?', choices=['major', 'minor', 'patch'])
+        parser.add_argument('-v', '--version', help='Show program\'s version number and exit.', action='store_true')
+        parser.add_argument('-h', '--help', action='help', default=argparse.SUPPRESS, help='Show this help message and exit.')
+        parser.add_argument('-n', '--next', help='Show the next release version number.', action='store_true')
+        parser.add_argument('--generate-rcfile', help='Create a \'.makaronrc\' file if not present.', action='store_true')
         args = parser.parse_args()
 
         main(args)
 
-    except Exception as e:
+    except RuntimeError as e:
         print(e)
 
     except (KeyboardInterrupt, SystemExit):
