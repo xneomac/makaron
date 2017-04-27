@@ -140,8 +140,6 @@ def collect_version_with__all_rule(args, filename, all_regex):
             return version_number
     except IOError as e:
         raise(RuntimeError('No such file: \'{0}\''.format(filename)))
-    except FileNotFoundError as e:
-        raise(RuntimeError('No such file: \'{0}\''.format(filename)))
 
 
 def collect_version_with__separated_rule(args, filename, major_regex, minor_regex, patch_regex):
