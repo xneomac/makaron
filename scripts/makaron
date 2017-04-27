@@ -1,10 +1,13 @@
 #!/usr/bin/env python
+from __future__ import print_function
+from builtins import input
 
-import argparse, re, os, yaml
+import argparse, re, os, yaml, sys
+import copy
 
 config_file = '.makaronrc'
 
-__version__ = '0.1.1'
+__version__ = '0.1.2'
 __program__ = 'makaron'
 
 def main(args):
@@ -13,7 +16,7 @@ def main(args):
         raise(RuntimeError('Cannot show you next release if you do not indicate the type of the release.\nAdd \'major\', \'minor\' or \'patch\' to the command.'))
 
     if args.version:
-        raise(RuntimeError('{0} {1}'.format(__program__, __version__)))
+        raise(RuntimeError('{0} {1}\nPython {2}'.format(__program__, __version__, sys.version)))
 
     if os.path.isfile(config_file):
 
@@ -135,6 +138,8 @@ def collect_version_with__all_rule(args, filename, all_regex):
             else: raise(RuntimeError('\'{0}\': no version found'.format(filename)))
 
             return version_number
+    except IOError as e:
+        raise(RuntimeError('No such file: \'{0}\''.format(filename)))
     except FileNotFoundError as e:
         raise(RuntimeError('No such file: \'{0}\''.format(filename)))
 
@@ -185,7 +190,7 @@ def check_version(args, version_collected):
 
 def update_version(args, old_version):
 
-    new_version = old_version.copy()
+    new_version = copy.copy(old_version)
 
     if args.verb:
 

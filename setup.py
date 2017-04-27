@@ -2,7 +2,7 @@
 
 from setuptools import setup
 
-__version__ = '0.1.1'
+__version__ = '0.1.2'
 
 setup(
     name='makaron',
@@ -12,6 +12,6 @@ setup(
     author_email='noel@martignoni.fr',
     url='https://gitlab.com/makaron/makaron',
     scripts = ['scripts/makaron'],
-    install_requires=[],
+    install_requires=['future', 'pyyaml'],
     packages = [],
 )
