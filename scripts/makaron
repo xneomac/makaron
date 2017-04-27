@@ -7,7 +7,7 @@ import copy
 
 config_file = '.makaronrc'
 
-__version__ = '0.1.3'
+__version__ = '0.1.4'
 __program__ = 'makaron'
 
 def main(args):
@@ -139,8 +139,6 @@ def collect_version_with__all_rule(args, filename, all_regex):
 
             return version_number
     except IOError as e:
-        raise(RuntimeError('No such file: \'{0}\''.format(filename)))
-    except FileNotFoundError as e:
         raise(RuntimeError('No such file: \'{0}\''.format(filename)))
 
 
