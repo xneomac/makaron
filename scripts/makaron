@@ -7,7 +7,7 @@ import copy
 
 config_file = '.makaronrc'
 
-__version__ = '0.1.5'
+__version__ = '0.1.6'
 __program__ = 'makaron'
 
 def main(args):
@@ -227,19 +227,23 @@ def prompt_choice(args, rules, old_version, new_version):
     old_version_str = '.'.join(old_version)
     new_version_str = '.'.join(new_version)
 
-    if old_version_str == new_version_str:
-        print(old_version_str)
+    if args.yes:
+        apply_version(args, rules, new_version)
+
     else:
-        print(old_version_str, '->', new_version_str)
-
-        confirm = input('confirm [y/n] (y): ')
-
-        if confirm == 'y' or confirm == '':
-            apply_version(args, rules, new_version)
-        elif confirm == 'n':
-            pass
+        if old_version_str == new_version_str:
+            print(old_version_str)
         else:
-            print('bad response')
+            print(old_version_str, '->', new_version_str)
+
+            confirm = input('confirm [y/n] (y): ')
+
+            if confirm == 'y' or confirm == '':
+                apply_version(args, rules, new_version)
+            elif confirm == 'n':
+                pass
+            else:
+                print('bad response')
 
 
 def apply_version(args, rules, new_version):
@@ -325,6 +329,7 @@ if __name__ == '__main__':
         parser.add_argument('-v', '--version', help='Show program\'s version number and exit.', action='store_true')
         parser.add_argument('-h', '--help', action='help', default=argparse.SUPPRESS, help='Show this help message and exit.')
         parser.add_argument('-n', '--next', help='Show the next release version number.', action='store_true')
+        parser.add_argument('-y', '--yes', help='Auto confirm the passage to next version.', action='store_true')
         parser.add_argument('--generate-rcfile', help='Create a \'.makaronrc\' file if not present.', action='store_true')
         args = parser.parse_args()
 
