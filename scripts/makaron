@@ -61,8 +61,8 @@ def parse_and_execute_config(args, config):
     if 'version' in config and config['version']:
 
         rules = parse_rules(config)
-        version_collected = collect_versions(args, rules)
-        check_version(args, version_collected)
+        version_collected, file_collected = collect_versions(args, rules)
+        check_version(args, version_collected, file_collected)
 
         old_version = version_collected[0].split('.')
         new_version = update_version(args, old_version)
@@ -116,16 +116,21 @@ def parse_rule(rules, version_rule):
 def collect_versions(args, rules):
 
     version_collected = []
+    file_collected = {}
 
     for all_rule in rules['all']:
         version = collect_version_with__all_rule(args, all_rule['filename'], all_rule['regex'])
-        if version: version_collected.append(version)
+        if version:
+            version_collected.append(version)
+            file_collected[all_rule['filename']] = version
 
     for separated_rule in rules['separated']:
         version = collect_version_with__separated_rule(args, separated_rule['filename'], separated_rule['major'], separated_rule['minor'], separated_rule['patch'])
-        if version: version_collected.append(version)
+        if version:
+            version_collected.append(version)
+            file_collected[separated_rule['filename']] = version
 
-    return version_collected
+    return version_collected, file_collected
 
 
 def collect_version_with__all_rule(args, filename, all_regex):
@@ -138,7 +143,7 @@ def collect_version_with__all_rule(args, filename, all_regex):
             if m: version_line = m.group(0)
             else: raise(RuntimeError('\'{0}\': no version found'.format(filename)))
 
-            m = re.search('[0-9]\.[0-9]\.[0-9]', version_line)
+            m = re.search('[0-9]+\.[0-9]+\.[0-9]+', version_line)
             if m: version_number = m.group(0)
             else: raise(RuntimeError('\'{0}\': no version found'.format(filename)))
 
@@ -156,7 +161,7 @@ def collect_version_with__separated_rule(args, filename, major_regex, minor_rege
         if m: major_line = m.group(0)
         else: raise(RuntimeError('No major found: \'{0}\''.format(filename)))
 
-        m = re.search('[0-9]', major_line)
+        m = re.search('[0-9]+', major_line)
         if m: major_number = m.group(0)
         else: raise(RuntimeError('No major found: \'{0}\''.format(filename)))
 
@@ -164,7 +169,7 @@ def collect_version_with__separated_rule(args, filename, major_regex, minor_rege
         if m: minor_line = m.group(0)
         else: raise(RuntimeError('No minor found: \'{0}\''.format(filename)))
 
-        m = re.search('[0-9]', minor_line)
+        m = re.search('[0-9]+', minor_line)
         if m: minor_number = m.group(0)
         else: raise(RuntimeError('No minor found: \'{0}\''.format(filename)))
 
@@ -172,14 +177,14 @@ def collect_version_with__separated_rule(args, filename, major_regex, minor_rege
         if m: patch_line = m.group(0)
         else: raise(RuntimeError('No patch found: \'{0}\''.format(filename)))
 
-        m = re.search('[0-9]', patch_line)
+        m = re.search('[0-9]+', patch_line)
         if m: patch_number = m.group(0)
         else: raise(RuntimeError('No patch found: \'{0}\''.format(filename)))
 
         return '{0}.{1}.{2}'.format(major_number, minor_number, patch_number)
 
 
-def check_version(args, version_collected):
+def check_version(args, version_collected, file_collected):
 
     ok = True
     first_version = version_collected[0]
@@ -188,7 +193,10 @@ def check_version(args, version_collected):
             ok = False
 
     if not ok:
-        raise(RuntimeError('Version found are not the same: {0}.'.format(version_collected)))
+        versions_formatted = ''
+        for filename, version in file_collected.items():
+            versions_formatted += '- {}: {}\n'.format(filename, version)
+        raise(RuntimeError('Version found are not the same:\n{0}.'.format(versions_formatted[:-1])))
 
 
 def update_version(args, old_version):
@@ -266,7 +274,7 @@ def apply_version_all_rule(args, filename, all_regex, new_version):
         if m: version_line = m.group(0)
         else: raise(Exception('\'{0}\': no version found'.format(filename)))
 
-        m = re.search('[0-9]\.[0-9]\.[0-9]', version_line)
+        m = re.search('[0-9]+\.[0-9]+\.[0-9]+', version_line)
         if m: old_version_str = m.group(0)
         else: raise(Exception('\'{0}\': no version found'.format(filename)))
 
@@ -287,7 +295,7 @@ def apply_version_separated_rule(args, filename, major_regex, minor_regex, patch
         if m: major_line = m.group(0)
         else: raise(Exception('\'{0}\': no major found'.format(filename)))
 
-        m = re.search('[0-9]', major_line)
+        m = re.search('[0-9]+', major_line)
         if m: major_number = m.group(0)
         else: raise(Exception('\'{0}\': no major found'.format(filename)))
 
@@ -298,7 +306,7 @@ def apply_version_separated_rule(args, filename, major_regex, minor_regex, patch
         if m: minor_line = m.group(0)
         else: raise(Exception('\'{0}\': no minor found'.format(filename)))
 
-        m = re.search('[0-9]', minor_line)
+        m = re.search('[0-9]+', minor_line)
         if m: minor_number = m.group(0)
         else: raise(Exception('\'{0}\': no minor found'.format(filename)))
 
@@ -309,7 +317,7 @@ def apply_version_separated_rule(args, filename, major_regex, minor_regex, patch
         if m: patch_line = m.group(0)
         else: raise(Exception('\'{0}\': no major found'.format(filename)))
 
-        m = re.search('[0-9]', patch_line)
+        m = re.search('[0-9]+', patch_line)
         if m: patch_number = m.group(0)
         else: raise(Exception('\'{0}\': no major found'.format(filename)))
 
@@ -330,6 +338,11 @@ if __name__ == '__main__':
         parser.add_argument('-h', '--help', action='help', default=argparse.SUPPRESS, help='Show this help message and exit.')
         parser.add_argument('-n', '--next', help='Show the next release version number.', action='store_true')
         parser.add_argument('-y', '--yes', help='Auto confirm the passage to next version.', action='store_true')
+
+        parser.add_argument('--alpha', help='Add an alpha at the end of the version.', action='store_true')
+        parser.add_argument('--beta', help='Add a beta at the end of the version', action='store_true')
+        parser.add_argument('--rc', help='Add an rc (release condidate) at the end of the version', action='store_true')
+
         parser.add_argument('--generate-rcfile', help='Create a \'.makaronrc\' file if not present.', action='store_true')
         args = parser.parse_args()
 
