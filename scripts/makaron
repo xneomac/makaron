@@ -7,7 +7,7 @@ import copy
 
 config_file = '.makaronrc'
 
-__version__ = '0.1.7'
+__version__ = '0.2.0'
 __program__ = 'makaron'
 
 def main(args):
@@ -25,7 +25,31 @@ def main(args):
                 config = yaml.safe_load(stream.read())
             except:
                 raise(RuntimeError('Bad \'.makaronrc\' file.\nCheck if it is a correct YAML file.'))
-            parse_and_execute_config(args, config)
+
+            if not 'version' in config and not config['version']:
+                raise(RuntimeError('Makaron has nothing to do.'))
+
+            rules = parse_rules(config)
+
+            if args.apply and args.verb:
+                raise(RuntimeError('Cannot give a specific version and also update with major, minor or patch.'))
+
+            elif not args.apply and args.verb:
+                old_version = get_old_version(args, rules)
+                new_version = update_version(args, old_version)
+                if args.next:
+                    print_version(args, new_version)
+                else:
+                    prompt_choice(args, rules, old_version, new_version)
+
+            elif args.apply and not args.verb:
+                old_version = get_old_version(args, rules)
+                version_to_apply = args.apply.split('.')
+                prompt_choice(args, rules, old_version, version_to_apply)
+
+            else:
+                old_version = get_old_version(args, rules)
+                print('.'.join(old_version))
 
     else:
         if args.generate_rcfile:
@@ -54,26 +78,12 @@ version:
         print('hey')
 
 
-def parse_and_execute_config(args, config):
-
+def get_old_version(args, rules):
     version_collected = []
-
-    if 'version' in config and config['version']:
-
-        rules = parse_rules(config)
-        version_collected, file_collected = collect_versions(args, rules)
-        check_version(args, version_collected, file_collected)
-
-        old_version = version_collected[0].split('.')
-        new_version = update_version(args, old_version)
-
-        if args.next:
-            print_version(args, new_version)
-        else:
-            prompt_choice(args, rules, old_version, new_version)
-
-    else:
-        print('Makaron has nothing to do.')
+    version_collected, file_collected = collect_versions(args, rules)
+    check_version(args, version_collected, file_collected)
+    old_version = version_collected[0].split('.')
+    return old_version
 
 
 def parse_rules(config):
@@ -329,6 +339,12 @@ def apply_version_separated_rule(args, filename, major_regex, minor_regex, patch
         stream.write(content)
 
 
+def version_regex(s, pat=re.compile(r'[0-9]+\.[0-9]+\.[0-9]+')):
+    if not pat.match(s):
+        raise argparse.ArgumentTypeError
+    return s
+
+
 if __name__ == '__main__':
 
     try:
@@ -338,10 +354,7 @@ if __name__ == '__main__':
         parser.add_argument('-h', '--help', action='help', default=argparse.SUPPRESS, help='Show this help message and exit.')
         parser.add_argument('-n', '--next', help='Show the next release version number.', action='store_true')
         parser.add_argument('-y', '--yes', help='Auto confirm the passage to next version.', action='store_true')
-
-        parser.add_argument('--alpha', help='Add an alpha at the end of the version.', action='store_true')
-        parser.add_argument('--beta', help='Add a beta at the end of the version', action='store_true')
-        parser.add_argument('--rc', help='Add an rc (release condidate) at the end of the version', action='store_true')
+        parser.add_argument('--apply', help='Apply a specific version.', type=version_regex)
 
         parser.add_argument('--generate-rcfile', help='Create a \'.makaronrc\' file if not present.', action='store_true')
         args = parser.parse_args()
