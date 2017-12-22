@@ -1,6 +1,6 @@
 import os, yaml
 
-from .exception import YamlErrorConfigFileParsing, UnknownErrorConfigFileParsing, NoConfigFileFound
+from .exception import YamlErrorConfigFileParsing, UnknownErrorConfigFileParsing, NoConfigFileFound, YamlErrorConfigFileBadType
 
 config_file_name = '.makaron.yml'
 
@@ -28,6 +28,9 @@ def read_config_file():
             try:
                 content = stream.read()
                 config = yaml.safe_load(content)
+                if not isinstance(config, dict):
+                    raise YamlErrorConfigFileBadType(type(config))
+
                 return config
             except yaml.YAMLError as exc:
                 if hasattr(exc, 'problem_mark'):
