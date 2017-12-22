@@ -15,3 +15,20 @@ autoversion:
   image: nmartignoni/makaron
   script:
     - autoversion.sh
+
+pypi:
+  stage: deploy
+  image: python:alpine
+  before_script: []
+  script:
+    - echo "[server-login]" >> ~/.pypirc
+    - echo "username=" ${PYPI_USER} >> ~/.pypirc
+    - echo "password=" ${PYPI_PASSWORD} >> ~/.pypirc
+    - python setup.py check sdist bdist upload
+    - echo "" > ~/.pypirc && rm ~/.pypirc
+  after_script:
+    - rm -vf ~/.pypirc
+  only:
+    - /^v\d+\.\d+\.\d+([abc]\d*)?$/
+  except:
+    - branches
