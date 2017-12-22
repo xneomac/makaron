@@ -2,15 +2,6 @@ stages:
   - tests
   - deploy
 
-before_script:
-  - mkdir -pvm 0700 ~/.ssh
-  - ssh-keyscan -H 'gitlab.com' >> ~/.ssh/known_hosts
-  - eval `ssh-agent -s`
-  - ssh-add <(echo "$SSH_PRIVATE_KEY")
-
-after_script:
-  - rm -Rfv ~/.ssh
-
 tests:
   stage: tests
   image: python:alpine
@@ -20,6 +11,13 @@ tests:
 autoversion:
   stage: deploy
   image: nmartignoni/makaron
+  before_script:
+    - mkdir -pvm 0700 ~/.ssh
+    - ssh-keyscan -H 'gitlab.com' >> ~/.ssh/known_hosts
+    - eval `ssh-agent -s`
+    - ssh-add <(echo "$SSH_PRIVATE_KEY")
+  after_script:
+    - rm -Rfv ~/.ssh
   script:
     - autoversion.sh
   except:
@@ -28,7 +26,6 @@ autoversion:
 pypi:
   stage: deploy
   image: python:alpine
-  before_script: []
   script:
     - echo "[server-login]" >> ~/.pypirc
     - echo "username=" ${PYPI_USER} >> ~/.pypirc
