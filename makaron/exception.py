@@ -46,3 +46,29 @@ class VersionsFoundAreDifferent(MakaronException):
     def __init__(self):
         message = versions_found_are_different_message
         super(VersionsFoundAreDifferent, self).__init__(message)
+
+
+bad_version_format = \
+'''
+The version provided is not compatible with makaron version format.
+provided: {}
+makaron format: [uint].[uint].[uint]
+'''
+
+class BadVersionFormat(MakaronException):
+    def __init__(self, version):
+        message = bad_version_format.format(version)
+        super(BadVersionFormat, self).__init__(message)
+
+
+bad_version_component_format = \
+'''
+The {} component of the version provided is not correct.
+It should be an unsigned int.
+provided: {}
+'''
+
+class BadVersionComponentFormat(MakaronException):
+    def __init__(self, component_type, value):
+        message = bad_version_component_format.format(component_type, value)
+        super(BadVersionComponentFormat, self).__init__(message)
