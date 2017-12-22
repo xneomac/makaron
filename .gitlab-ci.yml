@@ -1,4 +1,5 @@
 stages:
+  - tests
   - deploy
 
 before_script:
@@ -9,6 +10,12 @@ before_script:
 
 after_script:
   - rm -Rfv ~/.ssh
+
+tests:
+  stage: tests
+  image: python:alpine
+  script:
+    - python -m unittest discover
 
 autoversion:
   stage: deploy
