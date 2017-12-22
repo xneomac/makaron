@@ -9,10 +9,6 @@ config_file_content = \
 # more info at https://makaron.gitlab.io
 
 setup.py: "__version__ = .*"
-version.c:
-    major: "#define major .*"
-    minor: "#define minor .*"
-    patch: "#define patch .*"
 
 '''.format(config_file_name)
 

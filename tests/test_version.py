@@ -1,7 +1,7 @@
 import unittest
 
-from makaron import Version, LocatedVersion
-from makaron.exception import BadVersionFormat, BadVersionComponentFormat
+from makaron.version import *
+from makaron.exception import BadVersionFormat, BadVersionComponentFormat, VersionsFoundAreDifferent
 
 
 class TestVersion(unittest.TestCase):
@@ -123,11 +123,24 @@ class TestLocatedVersion(unittest.TestCase):
 
     def test_creation(self):
         file_name = 'filename.py'
-        line = 'this is a line'
-        version = Version()
-        version.set_from_string('1.2.3')
+        version = '1.2.3'
 
-        located_version = LocatedVersion(version, file_name, line)
+        located_version = LocatedVersion(version, file_name)
         self.assertEqual(located_version.version.get(), '1.2.3')
         self.assertEqual(located_version.file_name, 'filename.py')
-        self.assertEqual(located_version.line, 'this is a line')
+
+
+class TestVersions(unittest.TestCase):
+
+    def test_check_version_are_identical(self):
+        version_a = LocatedVersion('1.2.0', 'file_a.py')
+        version_b = LocatedVersion('1.2.0', 'file_b.py')
+        version_c = LocatedVersion('1.2.0', 'file_c.py')
+        check_version_are_identical([version_a, version_b, version_c])
+
+    def test_check_version_are_identica(self):
+        version_a = LocatedVersion('1.2.0', 'file_a.py')
+        version_b = LocatedVersion('1.4.0', 'file_b.py')
+        version_c = LocatedVersion('1.6.0', 'file_c.py')
+        with self.assertRaises(VersionsFoundAreDifferent):
+            check_version_are_identical([version_a, version_b, version_c])

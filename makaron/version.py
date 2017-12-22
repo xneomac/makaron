@@ -1,15 +1,28 @@
 import re
-from .exception import BadVersionFormat, BadVersionComponentFormat
+from .exception import BadVersionFormat, BadVersionComponentFormat, VersionsFoundAreDifferent
 
 full_version_regex_format = r'[0-9]+\.[0-9]+\.[0-9]+'
-separated_version_regex_format = r'[0-9]+'
+
+
+def check_version_are_identical(versions):
+    different = False
+
+    first_version = versions[0].version.get()
+    for located in versions[1:]:
+        if located.version.get() != first_version:
+            different = True
+            break
+
+    if different:
+        raise VersionsFoundAreDifferent(versions)
 
 
 class Version():
-    def __init__(self):
-        self.major = 0
-        self.minor = 0
-        self.patch = 0
+    def __init__(self, string_version='0.0.0'):
+        self.set_from_string(string_version)
+
+    def __str__(self):
+        return self.get()
 
     def copy(self, version):
         self.major = version.major
@@ -64,7 +77,6 @@ class Version():
 
 
 class LocatedVersion():
-    def __init__(self, version, file_name, line):
-        self.version = version
+    def __init__(self, version, file_name):
+        self.version = Version(version)
         self.file_name = file_name
-        self.line = line

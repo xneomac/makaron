@@ -50,14 +50,42 @@ class YamlErrorConfigFileBadType(MakaronException):
         super(YamlErrorConfigFileBadType, self).__init__(message)
 
 
+config_bad_format_message = \
+'''
+The config provided should be a dict and it is a {}.
+Please check the format of your config.
+'''
+
+class ConfigBadFormat(MakaronException):
+    def __init__(self, type_found):
+        message = config_bad_format_message.format(type_found)
+        super(ConfigBadFormat, self).__init__(message)
+
+
+rule_bad_format_message = \
+'''
+The rule for finding version should be a string or a list of string.
+Please check the format of your config.
+'''
+
+class RuleBadFormat(MakaronException):
+    def __init__(self):
+        message = rule_bad_format_message
+        super(RuleBadFormat, self).__init__(message)
+
+
 versions_found_are_different_message = \
 '''
 Versions found are different.
+{}
 '''
 
 class VersionsFoundAreDifferent(MakaronException):
-    def __init__(self):
-        message = versions_found_are_different_message
+    def __init__(self, versions):
+        versions_formatted = ''
+        for version in versions:
+            versions_formatted += '- {}: {}\n'.format(version.file_name, version.version.get())
+        message = versions_found_are_different_message.format(versions_formatted)
         super(VersionsFoundAreDifferent, self).__init__(message)
 
 
@@ -85,3 +113,15 @@ class BadVersionComponentFormat(MakaronException):
     def __init__(self, component_type, value):
         message = bad_version_component_format.format(component_type, value)
         super(BadVersionComponentFormat, self).__init__(message)
+
+
+bad_version_component_format = \
+'''
+The rule ({}) you have provide for the file {} does not indicate the position of the version.
+The string [version] should be written somewhere in the rule.
+'''
+
+class MissingVersionInRule(MakaronException):
+    def __init__(self, file_name, regex):
+        message = bad_version_component_format.format(regex, file_name)
+        super(MissingVersionInRule, self).__init__(message)

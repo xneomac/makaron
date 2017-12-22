@@ -18,23 +18,11 @@ You can update version number with this format `major.minor.patch` with the foll
 setup.py: "__version__ = .*"
 ```
 
-You can also choose to store your version number in different line with the following `.makaron.yml` file.
-
-```
-setup.py:
-    major: "major = .*\n"
-    minor: "minor = .*\n"
-    patch: "patch = .*\n"
-```
-
 You can also add several files to update using different method, like so:
 
 ```
 setup.py: "__version__ = .*"
-lib/version.py:
-    major: "major = .*\n"
-    minor: "minor = .*\n"
-    patch: "patch = .*\n"
+lib/version.py: "__version__ = .*"
 ```
 
 You can also update different versions in the same file, doing this:
@@ -42,9 +30,7 @@ You can also update different versions in the same file, doing this:
 ```
 setup.py:
   - "__version__ = .*"
-  - major: "major = .*\n"
-    minor: "minor = .*\n"
-    patch: "patch = .*\n"
+  - "@version: .*"
 ```
 
 ## Update version

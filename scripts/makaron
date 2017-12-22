@@ -6,7 +6,8 @@ import argparse, re, os, yaml, sys
 import copy
 import logging
 
-from makaron import MakaronException, Version, generate_config_file, get_makaron_rules, VersionsFoundAreDifferent
+from makaron import MakaronException, Version, read_config_file, generate_config_file, parse_version_rules
+from makaron import extract_version_from_rules, apply_version_to_rules
 
 __version__ = '0.3.3'
 __program__ = 'makaron'
@@ -19,15 +20,18 @@ stream_handler.setFormatter(formatter)
 stream_handler.setLevel(logging.INFO)
 logger.addHandler(stream_handler)
 
+
 def main(args):
-    handling_makaron_version(args)
-    handling_errors(args)
-    handle_generate_config_file(args)
+    show_makaron_version(args)
+    handling_args_errors(args)
+    should_generate_config_file(args)
 
-    rules = get_makaron_rules()
-    version = extract_version(rules)
+    config = read_config_file()
+    rules = parse_version_rules(config)
 
-    handle_show_version(args, version)
+    version = extract_version_from_rules(rules)
+
+    show_version(args, version)
 
     new_version = Version()
     new_version.copy(version)
@@ -45,21 +49,34 @@ def main(args):
     if args.apply:
         new_version.set_from_string(args.apply)
 
-    handle_print_next_version(args, new_version)
+    show_next_version(args, new_version)
 
     if args.yes:
-        apply_version(rules, new_version)
+        apply_version_to_rules(rules, new_version)
     else:
         prompt_version(rules, version, new_version)
 
 
-def handling_makaron_version(args):
+def prompt_version(rules, old_version, new_version):
+
+    logger.info('{} -> {}'.format(old_version, new_version))
+    confirm = input('confirm [y/n] (y): ')
+
+    if confirm == 'y' or confirm == '':
+        apply_version_to_rules(rules, new_version)
+    elif confirm == 'n':
+        pass
+    else:
+        logger.error('bad response')
+
+
+def show_makaron_version(args):
     if args.version:
         logger.info('{0} {1}\nPython {2}'.format(__program__, __version__, sys.version))
         raise SystemExit(0)
 
 
-def handling_errors(args):
+def handling_args_errors(args):
     if args.next and not args.verb:
         logger.error('Cannot show you next release if you do not indicate the type of the release.\nAdd \'major\', \'minor\' or \'patch\' to the command.')
         raise SystemExit(0)
@@ -69,65 +86,22 @@ def handling_errors(args):
         raise SystemExit(0)
 
 
-def handle_generate_config_file(args):
+def should_generate_config_file(args):
     if args.generate_config:
         generate_config_file()
         raise SystemExit(0)
 
 
-def handle_show_version(args, version):
+def show_version(args, version):
     if not args.verb and not args.apply:
-        logger.info(version.get())
+        logger.info(version)
         raise SystemExit(0)
 
 
-def handle_print_next_version(args, new_version):
+def show_next_version(args, new_version):
     if args.next:
-        logger.info(new_version.get())
+        logger.info(new_version)
         raise SystemExit(0)
-
-
-def extract_version(rules):
-
-    version_collected = []
-    for rule in rules:
-        version = rule.collect()
-        version_collected.append(version)
-
-    try:
-        first_version = version_collected[0].version.get()
-        for located in version_collected[1:]:
-            if located.version.get() != first_version:
-                raise VersionsFoundAreDifferent()
-
-        return version_collected[0].version
-    except VersionsFoundAreDifferent as e:
-        versions_formatted = ''
-        for located in version_collected:
-            versions_formatted += '- {}: {}\n'.format(located.file_name, located.version.get())
-        logger.error('Version found are not the same:\n{0}'.format(versions_formatted[:-1]))
-        raise SystemExit(0)
-
-
-def apply_version(rules, new_version):
-    for rule in rules:
-        rule.apply(new_version)
-
-
-def prompt_version(rules, old_version, new_version):
-
-    old_version_str = old_version.get()
-    new_version_str = new_version.get()
-
-    print('{} -> {}'.format(old_version_str, new_version_str))
-    confirm = input('confirm [y/n] (y): ')
-
-    if confirm == 'y' or confirm == '':
-        apply_version(rules, new_version)
-    elif confirm == 'n':
-        pass
-    else:
-        print('bad response')
 
 
 def full_version_regex(s, pat=re.compile(r'[0-9]+\.[0-9]+\.[0-9]+')):

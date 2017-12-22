@@ -1,7 +1,7 @@
 import unittest
 import os, tempfile, shutil
 
-from makaron import read_config_file, generate_config_file, config_file_name, config_file_content
+from makaron.config import *
 from makaron.exception import NoConfigFileFound, YamlErrorConfigFileParsing, YamlErrorConfigFileBadType
 
 bad_config_file='''
