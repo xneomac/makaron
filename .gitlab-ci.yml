@@ -1,0 +1,17 @@
+stages:
+  - deploy
+
+before_script:
+  - mkdir -pvm 0700 ~/.ssh
+  - ssh-keyscan -H 'gitlab.com' >> ~/.ssh/known_hosts
+  - eval `ssh-agent -s`
+  - ssh-add <(echo "$SSH_PRIVATE_KEY")
+
+after_script:
+  - rm -Rfv ~/.ssh
+
+autoversion:
+  stage: deploy
+  image: nmartignoni/makaron
+  script:
+    - autoversion.sh
