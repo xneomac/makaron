@@ -11,7 +11,7 @@ setup(
     author='Noel Martignoni',
     author_email='noel@martignoni.fr',
     url='https://gitlab.com/makaron/makaron',
-    scripts = ['scripts/makaron'],
+    scripts=['scripts/makaron'],
     install_requires=['future', 'pyyaml'],
-    packages = [],
+    packages=find_packages(exclude=['tests*']),
 )
