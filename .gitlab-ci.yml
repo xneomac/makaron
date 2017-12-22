@@ -15,6 +15,8 @@ autoversion:
   image: nmartignoni/makaron
   script:
     - autoversion.sh
+  except:
+    - tags
 
 pypi:
   stage: deploy

@@ -8,7 +8,7 @@ import logging
 
 from makaron import MakaronException, Version, generate_config_file, get_makaron_rules, VersionsFoundAreDifferent
 
-__version__ = '0.3.2'
+__version__ = '0.3.3'
 __program__ = 'makaron'
 
 logger = logging.getLogger(__program__)
