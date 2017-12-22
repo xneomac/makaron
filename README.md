@@ -2,7 +2,7 @@
 
 A simple way to handle your version number.
 
-Look at the homepage: [makaron.gitlab.io](http://makaron.gitlab.io/)
+Need more info, look at the homepage documentation. [makaron.gitlab.io](http://makaron.gitlab.io/)
 
 ## Config
 
