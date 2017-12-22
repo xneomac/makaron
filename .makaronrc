@@ -1,0 +1,7 @@
+version:
+  - file: setup.py
+    regex:
+      all: "__version__ = .*"
+  - file: scripts/makaron
+    regex:
+      all: "__version__ = .*"
