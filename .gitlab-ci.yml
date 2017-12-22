@@ -24,7 +24,7 @@ pypi:
     - echo "[server-login]" >> ~/.pypirc
     - echo "username=" ${PYPI_USER} >> ~/.pypirc
     - echo "password=" ${PYPI_PASSWORD} >> ~/.pypirc
-    - python setup.py check sdist bdist upload
+    - python setup.py sdist upload
     - echo "" > ~/.pypirc && rm ~/.pypirc
   after_script:
     - rm -vf ~/.pypirc
