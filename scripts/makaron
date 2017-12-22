@@ -6,12 +6,12 @@ import argparse, re, os, yaml, sys
 import copy
 import logging
 
-from makaron import MakaronException, Version, generate_config_file, get_makaron_rules
+from makaron import MakaronException, Version, generate_config_file, get_makaron_rules, VersionsFoundAreDifferent
 
 __version__ = '0.2.0'
 __program__ = 'makaron'
 
-logger = logging.getLogger()
+logger = logging.getLogger(__program__)
 logger.setLevel(logging.INFO)
 stream_handler = logging.StreamHandler()
 formatter = logging.Formatter('%(message)s')
@@ -89,23 +89,24 @@ def handle_print_next_version(args, new_version):
 
 
 def extract_version(rules):
-    try:
-        version_collected = []
-        for rule in rules:
-            version = rule.collect()
-            version_collected.append(version)
 
+    version_collected = []
+    for rule in rules:
+        version = rule.collect()
+        version_collected.append(version)
+
+    try:
         first_version = version_collected[0].version.get()
         for located in version_collected[1:]:
             if located.version.get() != first_version:
-                raise Exception()
+                raise VersionsFoundAreDifferent()
 
         return version_collected[0].version
-    except Exception:
+    except VersionsFoundAreDifferent as e:
         versions_formatted = ''
         for located in version_collected:
             versions_formatted += '- {}: {}\n'.format(located.file_name, located.version.get())
-        logger.error('Version found are not the same:\n{0}.'.format(versions_formatted[:-1]))
+        logger.error('Version found are not the same:\n{0}'.format(versions_formatted[:-1]))
         raise SystemExit(0)
 
 

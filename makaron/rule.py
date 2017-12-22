@@ -2,6 +2,7 @@ import re
 
 from .version import full_version_regex_format, separated_version_regex_format, LocatedVersion, Version
 from .config import read_config_file
+from .exception import MakaronException
 
 
 def get_makaron_rules():
@@ -24,17 +25,43 @@ def parse_version_rules(config):
 def parse_version_rule(rules, file_name, info):
 
     if type(info) == str:
-        rule = FullVersionRule(file_name, info)
-        rules.append(rule)
+        parse_full_vresion_rule(rules, file_name, info)
 
     elif type(info) == dict:
-        pass
+        parse_separated_version_rule(rules, file_name, info)
 
     elif type(info) == list:
-        pass
+        parse_list_version_rule(rules, file_name, info)
 
     else:
         raise Exception('bad rule type.')
+
+
+def parse_full_vresion_rule(rules, file_name, info):
+    rule = FullVersionRule(file_name, info)
+    rules.append(rule)
+
+def parse_list_version_rule(rules, file_name, info):
+    for info_item in info:
+        parse_version_rule(rules, file_name, info_item)
+
+
+def parse_separated_version_rule(rules, file_name, info):
+
+    if not 'major' in info:
+        raise RuntimeError('missing major rule')
+    major = info['major']
+
+    if not 'minor' in info:
+        raise RuntimeError('missing minor rule')
+    minor = info['minor']
+
+    if not 'patch' in info:
+        raise RuntimeError('missing patch rule')
+    patch = info['patch']
+
+    rule = SeparatedVersionRule(file_name, major, minor, patch)
+    rules.append(rule)
 
 
 def read_file(filename):
@@ -63,7 +90,7 @@ def search(regex, content):
         line = m.group(0)
         return line
     else:
-        raise(Exception('search_line: nothing found'))
+        raise Exception('search_line: nothing found\n{}\n\n{}'.format(regex, content))
 
 
 class FullVersionRule:
@@ -73,11 +100,12 @@ class FullVersionRule:
         self.file_name = file_name
 
     def apply(self, new_version):
-        
+
         content = read_file(self.file_name)
 
         version_line = search(self.version_regex, content)
         version_found = search(full_version_regex_format, version_line)
+
         new_version_line = version_line.replace(version_found, new_version.get())
         content = content.replace(version_line, new_version_line)
 
@@ -92,7 +120,7 @@ class FullVersionRule:
 
         version = Version()
         version.set_from_string(found)
-        located_version = LocatedVersion(version, self.file_name, line)
+        located_version = LocatedVersion(version, self.file_name, '\n  {}\n'.format(line))
 
         return located_version
 
@@ -111,6 +139,7 @@ class SeparatedVersionRule:
         version_components = new_version.get().split('.')
 
         major_component = version_components[0]
+
         major_line = search(self.major_regex, content)
         major_found = search(separated_version_regex_format, major_line)
         new_major_line = major_line.replace(major_found, major_component)
@@ -134,17 +163,29 @@ class SeparatedVersionRule:
 
         content = read_file(self.file_name)
 
-        major_line = search(self.major_regex, content)
-        major_found = search(separated_version_regex_format, major_line)
+        try:
+            major_line = search(self.major_regex, content)
+            major_found = search(separated_version_regex_format, major_line)
+        except Exception as e:
+            raise MakaronException('Could not find the major component in \'{}\' with \'{}\' regex.'.format(self.file_name, self.major_regex))
 
-        minor_line = search(self.minor_regex, content)
-        minor_found = search(separated_version_regex_format, minor_line)
+        try:
+            minor_line = search(self.minor_regex, content)
+            minor_found = search(separated_version_regex_format, minor_line)
+        except Exception as e:
+            raise MakaronException('Could not find the minor component in \'{}\' with \'{}\' regex.'.format(self.file_name, self.minor_regex))
 
-        patch_line = search(self.patch_regex, content)
-        patch_found = search(separated_version_regex_format, patch_line)
+        try:
+            patch_line = search(self.patch_regex, content)
+            patch_found = search(separated_version_regex_format, patch_line)
+        except Exception as e:
+            raise MakaronException('Could not find the patch component in \'{}\' with \'{}\' regex.'.format(self.file_name, self.patch_regex))
+
 
         version = Version()
         version.set_from_string('{0}.{1}.{2}'.format(major_found, minor_found, patch_found))
-        located_version = LocatedVersion(version, file_name, line)
+
+        line = '\n  major: {}\n  minor: {}\n  patch: {}\n'.format(major_line, minor_line, patch_line)
+        located_version = LocatedVersion(version, self.file_name, line)
 
         return located_version

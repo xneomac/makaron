@@ -1,0 +1,16 @@
+# .makaron.yml
+# more info at https://makaron.gitlab.io
+
+one.py: "__version__ = .*"
+
+multiple.py:
+  - "__version__ = .*"
+  - "version = .*"
+  - major: "major = .*"
+    minor: "minor = .*"
+    patch: "patch = .*"
+
+separated.py:
+  major: "major = .*"
+  minor: "minor = .*"
+  patch: "patch = .*"

@@ -35,3 +35,14 @@ class YamlErrorConfigFileParsing(MakaronException):
     def __init__(self, mark):
         message = yaml_error_config_file_parsing_message.format(mark.line+1, mark.column+1)
         super(YamlErrorConfigFileParsing, self).__init__(message)
+
+
+versions_found_are_different_message = \
+'''
+Versions found are different.
+'''
+
+class VersionsFoundAreDifferent(MakaronException):
+    def __init__(self):
+        message = versions_found_are_different_message
+        super(VersionsFoundAreDifferent, self).__init__(message)
