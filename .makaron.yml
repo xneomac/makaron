@@ -1,0 +1,5 @@
+# .makaron.yml
+# more info at https://makaron.gitlab.io
+
+setup.py: "__version__ = .*"
+scripts/makaron: "__version__ = .*"
