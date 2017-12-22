@@ -29,6 +29,6 @@ pypi:
   after_script:
     - rm -vf ~/.pypirc
   only:
-    - /^v\d+\.\d+\.\d+([abc]\d*)?$/
+    - /^\d+\.\d+\.\d+$/
   except:
     - branches
