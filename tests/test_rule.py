@@ -107,3 +107,50 @@ class TestRule(unittest.TestCase):
         with open(file_name, 'r') as stream:
             content = stream.read()
             self.assertEqual(content, content_expected)
+
+    def test_extract_version_from_rules(self):
+        file_name_a = 'file_a.py'
+        file_name_b = 'file_b.py'
+        content = 'version = 0.2.5'
+        version_regex = 'version = [version]'
+
+        with open(file_name_a, 'w') as stream:
+            stream.write(content)
+
+        with open(file_name_b, 'w') as stream:
+            stream.write(content)
+
+        rule_a = Rule(file_name_a, version_regex)
+        rule_b = Rule(file_name_b, version_regex)
+        rules = [rule_a, rule_b]
+
+        version = extract_version_from_rules(rules)
+        self.assertEqual(version.get(), '0.2.5')
+
+    def test_apply_version_to_rules(self):
+        version = Version('0.5.4')
+        file_name_a = 'file_a.py'
+        file_name_b = 'file_b.py'
+        content = 'version = 0.2.5'
+        version_regex = 'version = [version]'
+        content_expected = 'version = 0.5.4'
+
+        with open(file_name_a, 'w') as stream:
+            stream.write(content)
+
+        with open(file_name_b, 'w') as stream:
+            stream.write(content)
+
+        rule_a = Rule(file_name_a, version_regex)
+        rule_b = Rule(file_name_b, version_regex)
+        rules = [rule_a, rule_b]
+
+        apply_version_to_rules(rules, version)
+
+        with open(file_name_a, 'r') as stream:
+            content = stream.read()
+            self.assertEqual(content, content_expected)
+
+        with open(file_name_b, 'r') as stream:
+            content = stream.read()
+            self.assertEqual(content, content_expected)

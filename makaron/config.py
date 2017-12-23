@@ -1,6 +1,6 @@
 import os, yaml
 
-from .exception import YamlErrorConfigFileParsing, UnknownErrorConfigFileParsing, NoConfigFileFound, YamlErrorConfigFileBadType
+from .exception import YamlErrorConfigFileParsing, NoConfigFileFound, YamlErrorConfigFileBadType
 
 config_file_name = '.makaron.yml'
 
@@ -29,9 +29,7 @@ def read_config_file():
 
                 return config
             except yaml.YAMLError as exc:
-                if hasattr(exc, 'problem_mark'):
-                    raise YamlErrorConfigFileParsing(exc.problem_mark)
-                else:
-                    raise UnknownErrorConfigFileParsing()
+                raise YamlErrorConfigFileParsing(exc)
+
     else:
         raise NoConfigFileFound()

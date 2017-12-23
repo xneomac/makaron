@@ -3,12 +3,10 @@ from .tools import *
 from .exception import MissingVersionInRule, CannotFindAnyVersion
 
 def extract_version_from_rules(rules):
-
     version_collected = []
     for rule in rules:
         versions = rule.collect()
         version_collected += versions
-
     check_version_are_identical(versions)
     return version_collected[0].version
 

@@ -11,13 +11,10 @@ def read_file(file_name):
 
 
 def write_file(file_name, content):
-    try:
-        stream = open(file_name, 'w')
-        stream.write(content)
-        stream.close()
-        return content
-    except IOError as e:
-        raise RuntimeError('Error opening file: \'{0}\''.format(file_name))
+    stream = open(file_name, 'w')
+    stream.write(content)
+    stream.close()
+    return content
 
 
 def exist(regex, content):
@@ -30,8 +27,10 @@ def search(regex, content):
 
 def search_one(regex, content):
     result = re.findall(regex, content)
+    if len(result) == 0:
+        raise RuntimeError('Found no occurence of the following regex {} in {}'.format(regex, content))
     if len(result) > 1:
-        raise Exception('Found more then one occurence of the following regex {} in {}'.format(regex, content))
+        raise RuntimeError('Found more then one occurence of the following regex {} in {}'.format(regex, content))
     return result[0]
 
 
