@@ -1,5 +1,8 @@
 # Makaron
 
+[![build status](https://gitlab.com/makaron/makaron/badges/master/build.svg)](https://gitlab.com/makaron/makaron/commits/master)
+[![coverage](https://gitlab.com/makaron/makaron/badges/master/coverage.svg?job=coverage)](https://makaron.gitlab.io/makaron/coverage)
+
 A simple way to handle your version number.
 
 Need more info, look at the homepage documentation. [makaron.gitlab.io](http://makaron.gitlab.io/)
