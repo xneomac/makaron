@@ -32,6 +32,11 @@ class TestTools(unittest.TestCase):
         content_read = read_file(file_name)
         self.assertEqual(content_read, content)
 
+    def test_read_file_missing_file(self):
+        file_name = 'file.py'
+        with self.assertRaises(RuntimeError):
+            read_file(file_name)
+
     def test_search(self):
         regex = '[0-9]+\.[0-9]+\.[0-9]+'
         content = 'version = 0.1.2'
@@ -49,3 +54,21 @@ class TestTools(unittest.TestCase):
         content = 'version = 0.1.2\nversion = 5.2.0'
         result = search(regex, content)
         self.assertEqual(result, ['0.1.2', '5.2.0'])
+
+    def test_search_one(self):
+        regex = '[0-9]+\.[0-9]+\.[0-9]+'
+        content = 'version = 0.1.2'
+        result = search_one(regex, content)
+        self.assertEqual(result, '0.1.2')
+
+    def test_search_one_no_match(self):
+        regex = '[0-9]+\.[0-9]+\.[0-9]+'
+        content = 'version'
+        with self.assertRaises(RuntimeError):
+            result = search_one(regex, content)
+
+    def test_search_one_multiple(self):
+        regex = '[0-9]+\.[0-9]+\.[0-9]+'
+        content = 'version = 0.1.2\nversion = 5.2.0'
+        with self.assertRaises(RuntimeError):
+            search_one(regex, content)
