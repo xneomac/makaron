@@ -26,11 +26,9 @@ class UnknownErrorConfigFileParsing(MakaronException):
 
 
 yaml_error_config_file_parsing_message = \
-'''
-Yaml error during config file parsing.
+'''Yaml error during config file parsing.
 Error position: ({}:{}).
-Please check the format of your config file.
-'''
+Please check the format of your config file.'''
 
 class YamlErrorConfigFileParsing(MakaronException):
     def __init__(self, mark):
@@ -39,10 +37,8 @@ class YamlErrorConfigFileParsing(MakaronException):
 
 
 yaml_error_config_file_bad_type_message = \
-'''
-The Yaml parsed should be a dict and it is a {}.
-Please check the format of your config file.
-'''
+'''The Yaml parsed should be a dict and it is a {}.
+Please check the format of your config file.'''
 
 class YamlErrorConfigFileBadType(MakaronException):
     def __init__(self, type_found):
@@ -51,10 +47,8 @@ class YamlErrorConfigFileBadType(MakaronException):
 
 
 config_bad_format_message = \
-'''
-The config provided should be a dict and it is a {}.
-Please check the format of your config.
-'''
+'''The config provided should be a dict and it is a {}.
+Please check the format of your config.'''
 
 class ConfigBadFormat(MakaronException):
     def __init__(self, type_found):
@@ -63,10 +57,8 @@ class ConfigBadFormat(MakaronException):
 
 
 rule_bad_format_message = \
-'''
-The rule for finding version should be a string or a list of string.
-Please check the format of your config.
-'''
+'''The rule for finding version should be a string or a list of string.
+Please check the format of your config.'''
 
 class RuleBadFormat(MakaronException):
     def __init__(self):
@@ -75,10 +67,8 @@ class RuleBadFormat(MakaronException):
 
 
 versions_found_are_different_message = \
-'''
-Versions found are different.
-{}
-'''
+'''Versions found are different.
+{}'''
 
 class VersionsFoundAreDifferent(MakaronException):
     def __init__(self, versions):
@@ -90,11 +80,9 @@ class VersionsFoundAreDifferent(MakaronException):
 
 
 bad_version_format = \
-'''
-The version provided is not compatible with makaron version format.
+'''The version provided is not compatible with makaron version format.
 provided: {}
-makaron format: [uint].[uint].[uint]
-'''
+makaron format: [uint].[uint].[uint]'''
 
 class BadVersionFormat(MakaronException):
     def __init__(self, version):
@@ -103,11 +91,9 @@ class BadVersionFormat(MakaronException):
 
 
 bad_version_component_format = \
-'''
-The {} component of the version provided is not correct.
+'''The {} component of the version provided is not correct.
 It should be an unsigned int.
-provided: {}
-'''
+provided: {}'''
 
 class BadVersionComponentFormat(MakaronException):
     def __init__(self, component_type, value):
@@ -116,12 +102,20 @@ class BadVersionComponentFormat(MakaronException):
 
 
 bad_version_component_format = \
-'''
-The rule ({}) you have provide for the file {} does not indicate the position of the version.
-The string [version] should be written somewhere in the rule.
-'''
+'''The rule ({}) you have provide for the file {} does not indicate the position of the version.
+The string [version] should be written somewhere in the rule.'''
 
 class MissingVersionInRule(MakaronException):
     def __init__(self, file_name, regex):
         message = bad_version_component_format.format(regex, file_name)
         super(MissingVersionInRule, self).__init__(message)
+
+
+cannot_find_any_version = \
+'''Cannot find any version in file {} with the pattern "{}".
+Please check the pattern you have provided in your config.'''
+
+class CannotFindAnyVersion(MakaronException):
+    def __init__(self, file_name, regex):
+        message = cannot_find_any_version.format(file_name, regex)
+        super(CannotFindAnyVersion, self).__init__(message)

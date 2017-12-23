@@ -1,5 +1,5 @@
 import re
-from .exception import BadVersionFormat, BadVersionComponentFormat, VersionsFoundAreDifferent
+from .exception import MakaronException, BadVersionFormat, BadVersionComponentFormat, VersionsFoundAreDifferent
 
 full_version_regex_format = r'[0-9]+\.[0-9]+\.[0-9]+'
 

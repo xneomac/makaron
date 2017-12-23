@@ -3,7 +3,7 @@ import os, tempfile, shutil
 
 from makaron.rule import *
 from makaron.version import Version
-from makaron.exception import MissingVersionInRule
+from makaron.exception import MissingVersionInRule, CannotFindAnyVersion
 
 class TestRule(unittest.TestCase):
 
@@ -61,6 +61,18 @@ class TestRule(unittest.TestCase):
         self.assertEqual(len(versions), 2)
         self.assertEqual(versions[0].version.get(), '0.2.5')
         self.assertEqual(versions[1].version.get(), '0.4.8')
+
+    def test_collect_none(self):
+        file_name = 'file.py'
+        version_regex = 'version = [version]'
+        content = 'version = '
+
+        with open(file_name, 'w') as stream:
+            stream.write(content)
+
+        with self.assertRaises(CannotFindAnyVersion):
+            rule = Rule(file_name, version_regex)
+            versions = rule.collect()
 
     def test_apply(self):
         version = Version('0.5.4')

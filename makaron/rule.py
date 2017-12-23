@@ -1,6 +1,6 @@
 from .version import check_version_are_identical, full_version_regex_format, LocatedVersion
 from .tools import *
-from .exception import VersionsFoundAreDifferent, MissingVersionInRule
+from .exception import MissingVersionInRule, CannotFindAnyVersion
 
 def extract_version_from_rules(rules):
 
@@ -20,12 +20,13 @@ def apply_version_to_rules(rules, new_version):
 
 class Rule:
 
-    def __init__(self, file_name, version_regex):
-        if exist(r'\[version\]', version_regex):
-            version_regex = version_regex.replace('[version]', full_version_regex_format)
+    def __init__(self, file_name, version_pattern):
+        if exist(r'\[version\]', version_pattern):
+            version_regex = version_pattern.replace('[version]', full_version_regex_format)
         else:
-            raise MissingVersionInRule(file_name, version_regex)
+            raise MissingVersionInRule(file_name, version_pattern)
 
+        self.version_pattern = version_pattern
         self.version_regex = version_regex
         self.file_name = file_name
 
@@ -33,6 +34,10 @@ class Rule:
         content = read_file(self.file_name)
         string_versions = search_all(self.version_regex, full_version_regex_format, content)
         versions = [LocatedVersion(string_version, self.file_name) for string_version in string_versions]
+
+        if len(versions) == 0:
+            raise CannotFindAnyVersion(self.file_name, self.version_pattern)
+
         return versions
 
     def apply(self, new_version):
