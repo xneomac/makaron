@@ -8,7 +8,7 @@ config_file_content = \
 '''# {}
 # more info at https://makaron.gitlab.io
 
-setup.py: "__version__ = .*"
+setup.py: "__version__ = '[version]'"
 
 '''.format(config_file_name)
 
