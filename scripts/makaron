@@ -72,7 +72,7 @@ def prompt_version(rules, old_version, new_version):
 
 def show_makaron_version(args):
     if args.version:
-        logger.info('{0} {1}\nPython {2}'.format(__program__, __version__, sys.version))
+        logging.info('{0} {1}\nPython {2}'.format(__program__, __version__, sys.version))
         raise SystemExit(0)
 
 
@@ -94,13 +94,13 @@ def should_generate_config_file(args):
 
 def show_version(args, version):
     if not args.verb and not args.apply:
-        logger.info(version)
+        print(version)
         raise SystemExit(0)
 
 
 def show_next_version(args, new_version):
     if args.next:
-        logger.info(new_version)
+        print(new_version)
         raise SystemExit(0)
 
 
