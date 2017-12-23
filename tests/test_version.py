@@ -82,6 +82,14 @@ class TestVersion(unittest.TestCase):
         with self.assertRaises(BadVersionFormat):
             version.set_from_string('bad version')
 
+    def test_get(self):
+        version = Version('1.2.3')
+        self.assertEqual(version.get(), '1.2.3')
+
+    def test_str(self):
+        version = Version('1.2.3')
+        self.assertEqual(str(version), '1.2.3')
+
     def test_increase_major(self):
         version = Version()
         version.set_from_string('1.2.3')

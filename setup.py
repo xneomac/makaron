@@ -2,7 +2,7 @@
 
 from setuptools import setup, find_packages
 
-__version__ = '0.5.2'
+__version__ = '1.0.0'
 
 setup(
     name='makaron',

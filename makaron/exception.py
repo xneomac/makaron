@@ -14,25 +14,13 @@ class NoConfigFileFound(MakaronException):
         super(NoConfigFileFound, self).__init__(message)
 
 
-unknown_error_config_file_parsing_message = \
-'''
-Unknown error during config file parsing.
-'''
-
-class UnknownErrorConfigFileParsing(MakaronException):
-    def __init__(self):
-        message = unknown_error_config_file_parsing_message
-        super(UnknownErrorConfigFileParsing, self).__init__(message)
-
-
 yaml_error_config_file_parsing_message = \
 '''Yaml error during config file parsing.
-Error position: ({}:{}).
 Please check the format of your config file.'''
 
 class YamlErrorConfigFileParsing(MakaronException):
-    def __init__(self, mark):
-        message = yaml_error_config_file_parsing_message.format(mark.line+1, mark.column+1)
+    def __init__(self, exc):
+        message = yaml_error_config_file_parsing_message
         super(YamlErrorConfigFileParsing, self).__init__(message)
 
 

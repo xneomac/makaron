@@ -6,9 +6,20 @@ tests:
   stage: tests
   image: python:alpine
   script:
+    - pip install coverage
     - python setup.py install
     - python -m unittest discover
     - makaron
+
+coverage:
+  stage: tests
+  image: python:alpine
+  script:
+    - pip install coverage
+    - python setup.py install
+    - coverage run --source=makaron -m unittest discover -s tests/
+    - coverage report -m
+  coverage: '/TOTAL.+ ([0-9]{1,3}%)/'
 
 autoversion:
   stage: deploy
