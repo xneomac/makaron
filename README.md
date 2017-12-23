@@ -8,6 +8,12 @@ A simple way to handle your version number.
 
 Need more info, look at the homepage documentation. [makaron.gitlab.io](http://makaron.gitlab.io/)
 
+## Install
+
+```
+pip install makaron
+```
+
 ## Config
 
 Makaron expect a `.makaron.yml` file in the current working directory.
@@ -19,22 +25,22 @@ Second a regex that will let him find the line where is the version number.
 You can update version number with this format `major.minor.patch` with the following `.makaron.yml` file.
 
 ```
-setup.py: "__version__ = .*"
+setup.py: "__version__ = '[version]'"
 ```
 
 You can also add several files to update using different method, like so:
 
 ```
-setup.py: "__version__ = .*"
-lib/version.py: "__version__ = .*"
+setup.py: "__version__ = '[version]'"
+lib/version.py: "__version__ = '[version]'"
 ```
 
 You can also update different versions in the same file, doing this:
 
 ```
 setup.py:
-  - "__version__ = .*"
-  - "@version: .*"
+  - "__version__ = '[version]'"
+  - "@version: [version]"
 ```
 
 ## Update version
