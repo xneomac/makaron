@@ -15,6 +15,7 @@ coverage:
   stage: tests
   image: python:alpine
   script:
+    - pip install coverage
     - python setup.py install
     - coverage run --source=makaron -m unittest discover -s tests/
     - coverage report -m
